@@ -1,15 +1,20 @@
 package games.banzai.rps.server;
 
-import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 
+/**
+ * Waits for at least two players to connect them between each other.
+ *
+ * @author Ivan Kopylov
+ */
 public class MatcherThread extends Thread
 {
-    private final Set<PlayerInteractionThread> playersThreads;
-    private final Set<GameSession>             gameSessions;
+    private final BlockingQueue<PlayerInteractionThread> playersThreads;
+    private final Set<GameSession>                       gameSessions;
 
-    public MatcherThread(Set<PlayerInteractionThread> playersThreads, Set<GameSession> gameSessions)
+    public MatcherThread(BlockingQueue<PlayerInteractionThread> playersThreads, Set<GameSession> gameSessions)
     {
         super("MatcherThread");
         this.playersThreads = playersThreads;
@@ -21,18 +26,30 @@ public class MatcherThread extends Thread
     {
         while (true)
         {
-            if (playersThreads.size() > 0 && playersThreads.stream().filter(thread -> thread.isActive() && thread.isReadyToPlay()).count() > 1)
+            if (atLeastTwoReadyPlayers())
             {
-                Iterator<PlayerInteractionThread> iterator = playersThreads.iterator();
+                try
+                {
+                    PlayerInteractionThread playerOne = playersThreads.take();
+                    PlayerInteractionThread playerTwo = playersThreads.take();
 
-                PlayerInteractionThread playerOne = iterator.next();
-                iterator.remove();
+                    gameSessions.add(new GameSession(UUID.randomUUID().toString(), playerOne, playerTwo, true));
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
 
-                PlayerInteractionThread playerTwo = iterator.next();
-                iterator.remove();
-
-                gameSessions.add(new GameSession(UUID.randomUUID().toString(), playerOne, playerTwo, true));
             }
         }
+    }
+
+    private boolean atLeastTwoReadyPlayers()
+    {
+        return playersThreads.size() > 1 &&
+                playersThreads
+                .stream()
+                .filter(PlayerInteractionThread::isReadyToPlay)
+                .count() > 1;
     }
 }

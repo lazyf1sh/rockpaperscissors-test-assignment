@@ -8,20 +8,23 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class Server
 {
-    private final Set<PlayerInteractionThread> playersThreads = Collections.synchronizedSet(new HashSet<>());
-    private final Set<GameSession>             gameSessions   = Collections.synchronizedSet(new HashSet<>());
+    /**
+     * Used this que to maintain players' join order.
+     */
+    private final BlockingQueue<PlayerInteractionThread> playersThreadsQue = new LinkedBlockingDeque<>();
+    private final Set<GameSession>                       gameSessions      = Collections.synchronizedSet(new HashSet<>());
 
     public void runServer()
     {
-        new ConnectionListenerThread(playersThreads).start();
-        new MatcherThread(playersThreads, gameSessions).start();
+        new ConnectionListenerThread(playersThreadsQue).start();
+        new MatcherThread(playersThreadsQue, gameSessions).start();
         new GameSessionRunnerThread(gameSessions).start();
-        new MaintenanceThread(playersThreads).start();
+        new MaintenanceThread(playersThreadsQue).start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() ->
-                playersThreads
+                playersThreadsQue
                         .stream()
-                        .filter(PlayerInteractionThread::isActive)
+                        .filter(PlayerInteractionThread::isStale)
                         .peek(thread -> thread.sendMessage("Server is stopping now. You will be disconnected."))
                         .forEach(Thread::interrupt)));
     }

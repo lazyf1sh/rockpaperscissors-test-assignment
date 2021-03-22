@@ -1,12 +1,15 @@
 package games.banzai.rps.server;
 
-import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
+/**
+ * Removes died threads.
+ */
 public class MaintenanceThread extends Thread
 {
-    private final Set<PlayerInteractionThread> playersThreads;
+    private final BlockingQueue<PlayerInteractionThread> playersThreads;
 
-    public MaintenanceThread(Set<PlayerInteractionThread> playersThreads)
+    public MaintenanceThread(BlockingQueue<PlayerInteractionThread> playersThreads)
     {
         super("MaintenanceThread");
         this.playersThreads = playersThreads;
@@ -14,10 +17,10 @@ public class MaintenanceThread extends Thread
 
     private static boolean threadDied(PlayerInteractionThread thread)
     {
-        if (!thread.isActive())
+        if (thread.isStale())
         {
             System.out.println("Thread " + thread.getName() + " died.");
-            return !thread.isActive();
+            return true;
         }
         return false;
     }

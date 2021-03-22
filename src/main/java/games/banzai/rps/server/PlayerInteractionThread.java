@@ -22,6 +22,7 @@ public final class PlayerInteractionThread extends Thread
     public PlayerInteractionThread(Socket socket)
     {
         super("PlayerInteractionThread");
+        active = true;
         this.socket = socket;
     }
 
@@ -30,8 +31,6 @@ public final class PlayerInteractionThread extends Thread
     {
         try
         {
-            active = true;
-
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream());
             writer.println("You've successfully connected.");
@@ -50,7 +49,7 @@ public final class PlayerInteractionThread extends Thread
                     this.disconnect();
                     return;
                 }
-                System.out.println("Message from player: " + line);
+                System.out.println("Message from player " + nickname + " :" + line);
 
                 for (PlayerMessageCallBack playerMessageCallback : playerMessageCallbacks)
                 {
@@ -67,7 +66,7 @@ public final class PlayerInteractionThread extends Thread
 
     public void sendMessage(String msg)
     {
-        if (writer != null && isActive())
+        if (writer != null && !isStale())
         {
             writer.println(msg);
             writer.flush();
@@ -96,7 +95,17 @@ public final class PlayerInteractionThread extends Thread
 
     public boolean isActive()
     {
-        return active && !socket.isClosed();
+        return active;
+    }
+
+    /**
+     * Ready to be removed. No longer required from technical and business point of view.
+     *
+     * @return
+     */
+    public boolean isStale()
+    {
+        return !active && !isAlive() && socket.isClosed();
     }
 
     public String getNickname()
@@ -105,7 +114,6 @@ public final class PlayerInteractionThread extends Thread
     }
 
     /**
-     *
      * Closed infrastructure and marks thread to be deleted.
      */
     public void disconnect()
