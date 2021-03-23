@@ -15,4 +15,5 @@ public class Constants
      * Is doesn't make sense to run it often.
      */
     public static final int    MAINTENANCE_INTERVAL         = 1000;
+    public static final int DEFAULT_PORT = 27015;
 }

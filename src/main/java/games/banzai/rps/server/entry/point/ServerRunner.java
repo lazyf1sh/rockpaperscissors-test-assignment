@@ -1,5 +1,6 @@
 package games.banzai.rps.server.entry.point;
 
+import games.banzai.rps.server.other.Constants;
 import games.banzai.rps.server.other.Server;
 
 /**
@@ -9,6 +10,7 @@ public class ServerRunner
 {
     public static void main(String[] args)
     {
-        new Server(27015).runServer();
+        new Server(Constants.DEFAULT_PORT).runServer();
+        System.out.println("Server is run on port " + Constants.DEFAULT_PORT);
     }
 }
