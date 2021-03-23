@@ -1,8 +1,0 @@
-set OBJECT=WScript.CreateObject("WScript.Shell")
-WScript.sleep(1000)
-OBJECT.SendKeys(Rnd)
-WScript.sleep(1000)
-OBJECT.SendKeys("{ENTER}")
-WScript.sleep(1000)
-OBJECT.SendKeys("^]")
-WScript.sleep(1000)

@@ -1,8 +1,6 @@
-package games.banzai.rps.server;
+package games.banzai.rps.server.other;
 
-import javax.swing.*;
-
-public enum GameElements
+public enum RockPaperScissors
 {
     ROCK("1"),
     PAPER("2"),
@@ -10,7 +8,7 @@ public enum GameElements
 
     private final String value;
 
-    GameElements(String value)
+    RockPaperScissors(String value)
     {
         this.value = value;
     }
